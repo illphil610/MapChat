@@ -5,6 +5,6 @@ package com.newwesterndev.mapchat.Model
  */
 object Model {
 
-    data class User(val username : String, val lat : String, val lng : String )
+    data class User(val username : String, val latitude : String, val longitude : String )
 
 }

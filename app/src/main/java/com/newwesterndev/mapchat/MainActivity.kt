@@ -28,7 +28,7 @@ class MainActivity : Activity(), DataAdapter.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        
+
         mCompositeDisposable = CompositeDisposable()
         initRecyclerView()
         loadJSON()
@@ -65,6 +65,6 @@ class MainActivity : Activity(), DataAdapter.Listener {
     }
 
     override fun onItemClick(user: Model.User) {
-        Toast.makeText(this, "${user.username} Clicked !", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "${user.username}, ${user.latitude}, ${user.longitude}", Toast.LENGTH_SHORT).show()
     }
 }
