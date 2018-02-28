@@ -67,4 +67,9 @@ class MainActivity : Activity(), DataAdapter.Listener {
     override fun onItemClick(user: Model.User) {
         Toast.makeText(this, "${user.username}, ${user.latitude}, ${user.longitude}", Toast.LENGTH_SHORT).show()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mCompositeDisposable?.clear()
+    }
 }
