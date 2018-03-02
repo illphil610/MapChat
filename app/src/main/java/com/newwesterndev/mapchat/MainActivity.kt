@@ -1,6 +1,7 @@
 package com.newwesterndev.mapchat
 
 import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -21,7 +22,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class MainActivity : Activity(), DataAdapter.Listener {
+class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFragmentInteractionListener {
 
     private val TAG = MainActivity::class.java.simpleName
     private val BASE_URL = "https://kamorris.com"
@@ -44,7 +45,7 @@ class MainActivity : Activity(), DataAdapter.Listener {
         mapchat_user_list.layoutManager = layoutManager
     }
 
-    private fun loadJSON() : RequestInterface {
+    private fun loadJSON(): RequestInterface {
         val requestInterface = Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -96,5 +97,9 @@ class MainActivity : Activity(), DataAdapter.Listener {
     override fun onDestroy() {
         super.onDestroy()
         mUtility.clearDisposables(mCompositeDisposable, mDisposable)
+    }
+
+    override fun onFragmentInteraction(uri: Uri?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

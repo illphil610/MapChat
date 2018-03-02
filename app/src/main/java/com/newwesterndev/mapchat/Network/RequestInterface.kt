@@ -20,9 +20,8 @@ interface RequestInterface {
     //@POST("lab/register_location.php")
     //fun addUser() :
 
-
-    companion object
-        fun create() : RequestInterface {
+    companion object Factory
+        fun create(): RequestInterface {
             val retrofit = Retrofit.Builder()
                     .baseUrl("https://kamorris.com")
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
