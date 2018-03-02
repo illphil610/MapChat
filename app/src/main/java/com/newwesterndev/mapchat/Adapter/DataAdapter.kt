@@ -8,9 +8,6 @@ import com.newwesterndev.mapchat.Model.Model
 import com.newwesterndev.mapchat.R
 import kotlinx.android.synthetic.main.recycler_view_row.view.*
 
-/**
- * Created by philip on 2/28/18.
- */
 class DataAdapter(private val userList : ArrayList<Model.User>, private val listener : Listener) : RecyclerView.Adapter<DataAdapter.ViewHolder>() {
 
     interface Listener {
@@ -29,7 +26,6 @@ class DataAdapter(private val userList : ArrayList<Model.User>, private val list
     }
 
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view) {
-
         fun bind(user: Model.User, listener: Listener) {
             itemView.user_name.text = user.username
             itemView.setOnClickListener { listener.onItemClick(user) }
