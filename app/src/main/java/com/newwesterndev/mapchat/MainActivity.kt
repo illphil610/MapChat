@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.widget.Toast
 import com.newwesterndev.mapchat.Adapter.DataAdapter
+import com.newwesterndev.mapchat.Fragments.PartnerListFragment
 import com.newwesterndev.mapchat.Model.Model
 import com.newwesterndev.mapchat.Network.RequestInterface
 import com.newwesterndev.mapchat.Utilities.Utility
@@ -22,7 +23,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFragmentInteractionListener {
+class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFragmentInteractionListener{
 
     private val TAG = MainActivity::class.java.simpleName
     private val BASE_URL = "https://kamorris.com"
@@ -99,7 +100,8 @@ class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFra
         mUtility.clearDisposables(mCompositeDisposable, mDisposable)
     }
 
-    override fun onFragmentInteraction(uri: Uri?) {
+    override fun onFragmentInteraction(uri: Uri) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
 }
