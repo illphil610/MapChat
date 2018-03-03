@@ -1,7 +1,9 @@
 package com.newwesterndev.mapchat
 
 import android.app.Activity
-import android.net.Uri
+import android.app.Fragment
+import android.app.FragmentManager
+import android.app.FragmentTransaction
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -23,10 +25,8 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFragmentInteractionListener{
+class MainActivity : Activity(), DataAdapter.Listener {
 
-    private val TAG = MainActivity::class.java.simpleName
-    private val BASE_URL = "https://kamorris.com"
     private var mCompositeDisposable = CompositeDisposable()
     private val mUtility = Utility()
     private lateinit  var mDisposable : Disposable
@@ -37,18 +37,33 @@ class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFra
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        initRecyclerView()
+
+        if (savedInstanceState == null) {
+
+            val fragmentManager = fragmentManager
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.add(R.id.mapchat_nav_fragment, PartnerListFragment.newInstance())
+            fragmentTransaction.commit()
+
+        }
+
     }
 
+    inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {
+        beginTransaction().func().commit()
+    }
+
+    /*
     private fun initRecyclerView() {
         mapchat_user_list.setHasFixedSize(true)
         val layoutManager : RecyclerView.LayoutManager = LinearLayoutManager(this)
         mapchat_user_list.layoutManager = layoutManager
     }
+    */
 
     private fun loadJSON(): RequestInterface {
         val requestInterface = Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(getString(R.string.kamorris))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(RequestInterface::class.java)
@@ -64,11 +79,11 @@ class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFra
         Toast.makeText(this, "Updating list", Toast.LENGTH_SHORT).show()
         mUserArrayList = ArrayList(userList)
         mAdapter = DataAdapter(mUserArrayList, this)
-        mapchat_user_list.adapter = mAdapter
+        //mapchat_user_list.adapter = mAdapter
     }
 
     private fun handleError(error: Throwable) {
-        Log.d(TAG, error.localizedMessage)
+        Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
         Toast.makeText(this, "Error ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
     }
 
@@ -81,7 +96,8 @@ class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFra
     }
 
     override fun onItemClick(user: Model.User) {
-        Toast.makeText(this, "${user.username}, ${user.latitude}, ${user.longitude}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "${user.username}, ${user.latitude}, " +
+                user.longitude, Toast.LENGTH_SHORT).show()
     }
 
     override fun onResume() {
@@ -99,9 +115,4 @@ class MainActivity : Activity(), DataAdapter.Listener, PartnerListFragment.OnFra
         super.onDestroy()
         mUtility.clearDisposables(mCompositeDisposable, mDisposable)
     }
-
-    override fun onFragmentInteraction(uri: Uri) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
 }
