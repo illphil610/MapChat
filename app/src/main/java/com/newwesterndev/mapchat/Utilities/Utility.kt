@@ -1,7 +1,5 @@
 package com.newwesterndev.mapchat.Utilities
 
-import android.app.FragmentManager
-import android.app.FragmentTransaction
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -20,9 +18,6 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-/**
- * Created by philip on 3/1/18.
- */
 class Utility(context: Context) {
 
     val mContext = context
@@ -59,5 +54,9 @@ class Utility(context: Context) {
     private fun handleError(error: Throwable) {
         Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
         Toast.makeText(mContext, "Error ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
+    }
+
+    fun showToast(content: Context, message: String) {
+        Toast.makeText(content, message, Toast.LENGTH_LONG).show()
     }
 }

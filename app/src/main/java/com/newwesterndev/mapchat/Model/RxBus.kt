@@ -13,7 +13,4 @@ object RxBus {
     }
 
     fun <T> listen(eventType: Class<T>): Observable<T> = publisher.ofType(eventType)
-
-    data class MessageEvent(val partnerList: ArrayList<Model.User>)
-
 }

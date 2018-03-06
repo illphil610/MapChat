@@ -3,6 +3,8 @@ package com.newwesterndev.mapchat.Fragments
 import android.content.Context
 import android.os.Bundle
 import android.app.Fragment
+import android.app.FragmentManager
+import android.app.FragmentTransaction
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -17,7 +19,6 @@ import com.newwesterndev.mapchat.Model.RxBus
 import com.newwesterndev.mapchat.R
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_partner_list.*
 
 class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
@@ -26,17 +27,6 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        /*
-        RxBus.listen(Model.UserList::class.java).subscribe({
-            Log.e("RXBUS", it.users.toString())
-            mPartnerList = it.users
-            mDataAdapter.notifyDataSetChanged()
-
-            //val user = Model.User("phil", "0", "0")
-            //mPartnerList.add(user)
-            Log.e("PARTNERLIST", mPartnerList.toString())
-        })
-        */
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -62,20 +52,18 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
         return view
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-    }
-
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-    }
-
     override fun onItemClick(user: Model.User) {
-        Toast.makeText(activity, "${user.username}, ${user.latitude}, ${user.longitude}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, "${user.username}, ${user.latitude}, " +
+                "${user.longitude}", Toast.LENGTH_SHORT).show()
+
+        fragmentManager.inTransaction {
+            replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
+        }
+    }
+
+    private inline fun FragmentManager.inTransaction(
+            func: FragmentTransaction.() -> FragmentTransaction) {
+        beginTransaction().func().addToBackStack(null).commit()
     }
 
     companion object {
