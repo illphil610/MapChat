@@ -44,7 +44,6 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({
-                    Log.e("RXBUS", it.users.toString())
                     mPartnerList.clear()
                     mPartnerList.addAll(it.users)
                     mDataAdapter.notifyDataSetChanged()

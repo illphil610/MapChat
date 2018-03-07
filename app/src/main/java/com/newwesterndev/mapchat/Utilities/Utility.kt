@@ -46,17 +46,21 @@ class Utility(context: Context) {
     }
 
     private fun handleResponse(userList: List<Model.User>) {
-        Toast.makeText(mContext, "Updating list", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(mContext, "Updating list", Toast.LENGTH_SHORT).show()
         mUserArrayList = ArrayList(userList)
         RxBus.publish(Model.UserList(mUserArrayList))
     }
 
     private fun handleError(error: Throwable) {
         Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
-        Toast.makeText(mContext, "Error ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(mContext, "Error ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
     }
 
     fun showToast(content: Context, message: String) {
         Toast.makeText(content, message, Toast.LENGTH_LONG).show()
+    }
+
+    fun getArrayList(): ArrayList<Model.User> {
+        return mUserArrayList
     }
 }
