@@ -4,7 +4,9 @@ import android.Manifest
 import android.app.Activity
 import android.app.FragmentManager
 import android.app.FragmentTransaction
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.util.Log
@@ -23,6 +25,15 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+import android.content.Intent
+import android.location.LocationManager
+import android.provider.Settings
+import android.widget.Toast
+import com.google.android.gms.location.LocationRequest
+import com.patloew.rxlocation.RxLocation
+import java.util.*
+
 
 class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface {
 
@@ -33,6 +44,9 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
     private lateinit var partnerListFragment: PartnerListFragment
     private lateinit var mapFragment: MapFragment
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private lateinit var mLocation: Location
+    private lateinit var rxLocation: RxLocation
+    private lateinit var locationRequest: LocationRequest
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,8 +56,23 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION), 10)
 
-        val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
+        /*
+        val service = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        if (!enabled) {
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            startActivity(intent)
+        }
+        */
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        rxLocation = RxLocation(this)
+        locationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(1000)
+                .setSmallestDisplacement(10.toFloat())
+
+        val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
         partnerListFragment = PartnerListFragment.newInstance()
         mapFragment = MapFragment.newInstance()
         //fragmentManager.inTransaction { replace(R.id.mapchat_nav_fragment, PartnerListFragment.newInstance()) }
@@ -58,6 +87,12 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
             transaction2.replace(R.id.partnerMapView, mapFragment)
                     .commit()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mRequestInterface = mUtility.loadJSON()
+        mDisposable = pollServer(mRequestInterface)
 
         if (ActivityCompat.checkSelfPermission
                 (this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -67,37 +102,16 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
                         this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
                         , 10) }
         } else {
-            mFusedLocationClient.lastLocation.addOnSuccessListener {
-                if (it != null) {
-                    mUtility.showToast(this, it.toString())
-                } else {
-                    mUtility.showToast(this, "Nah Fam")
-                }
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                mFusedLocationClient.lastLocation.addOnSuccessListener {
-                    if (it != null) {
-                        mUtility.showToast(this, it.toString())
-                    } else {
-                        mUtility.showToast(this, "Nah Fam")
+            mCompositeDisposable.add(rxLocation.location().updates(locationRequest)
+                    .flatMap {
+                        rxLocation.geocoding().fromLocation(it).toObservable()
                     }
-                }
-            }
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe({
+                        Toast.makeText(this, "Hey, " + it.toString(), Toast.LENGTH_LONG).show()
+                    }))
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mRequestInterface = mUtility.loadJSON()
-        mDisposable = pollServer(mRequestInterface)
     }
 
     override fun onStop() {
@@ -140,6 +154,26 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
 
     private inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {
         beginTransaction().func().commit()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                /*
+                mFusedLocationClient.lastLocation.addOnSuccessListener {
+                    if (it != null) {
+                        mLocation = it
+                        mUtility.showToast(this, mLocation.toString())
+                    } else {
+                        mUtility.showToast(this, "Nah Fam")
+                    }
+                }
+                */
+            }
+        }
     }
 
     companion object {

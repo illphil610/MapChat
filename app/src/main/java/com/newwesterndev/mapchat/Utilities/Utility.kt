@@ -2,7 +2,9 @@ package com.newwesterndev.mapchat.Utilities
 
 import android.content.Context
 import android.util.Log
+import android.view.Display
 import android.widget.Toast
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.newwesterndev.mapchat.MainActivity
 import com.newwesterndev.mapchat.Model.Model
 import com.newwesterndev.mapchat.Model.RxBus
@@ -54,6 +56,10 @@ class Utility(context: Context) {
     private fun handleError(error: Throwable) {
         Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
         //Toast.makeText(mContext, "Error ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
+    }
+
+    fun createUser(username: String, latLng: LatLng) : Model.User {
+        return Model.User(username, latLng.latitude.toString(), latLng.longitude.toString())
     }
 
     fun showToast(content: Context, message: String) {
