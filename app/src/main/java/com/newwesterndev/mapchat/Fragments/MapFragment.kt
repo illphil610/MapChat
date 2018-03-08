@@ -43,16 +43,6 @@ class MapFragment : Fragment() {
         return view
     }
 
-    private fun updateMap(userList: ArrayList<Model.User>) {
-        mMapView?.getMapAsync({
-            for (user in userList) {
-                val marker = MarkerOptions()
-                it.addMarker(marker
-                        .position(LatLng(user.latitude.toDouble(), user.longitude.toDouble())))
-            }
-        })
-    }
-
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         outState?.let { mMapView?.onSaveInstanceState(it) }
@@ -108,6 +98,15 @@ class MapFragment : Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         mMapFragmentInterface = context as MapFragment.MapFragmentInterface
+    }
+
+    private fun updateMap(userList: ArrayList<Model.User>) {
+        mMapView?.getMapAsync({
+            for (user in userList) {
+                val marker = MarkerOptions()
+                it.addMarker(marker.position(LatLng(user.latitude.toDouble(), user.longitude.toDouble())))
+            }
+        })
     }
 
     companion object {
