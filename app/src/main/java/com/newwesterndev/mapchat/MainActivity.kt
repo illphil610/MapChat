@@ -3,7 +3,6 @@ package com.newwesterndev.mapchat
 import android.app.Activity
 import android.app.FragmentManager
 import android.app.FragmentTransaction
-import android.graphics.ColorSpace
 import android.os.Bundle
 import android.util.Log
 import com.mapbox.mapboxsdk.maps.MapView
@@ -20,8 +19,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
-class MainActivity : Activity(), PartnerListFragment.PartnerListInterface
-                               , MapFragment.MapFragmentInterface {
+class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface {
 
     private var mCompositeDisposable = CompositeDisposable()
     private val mUtility = Utility(this)
@@ -29,39 +27,28 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface
     private lateinit var mRequestInterface: RequestInterface
     private lateinit var partnerListFragment: PartnerListFragment
     private lateinit var mapFragment: MapFragment
-    private var mTwoPainz : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
-        Log.e("twp painz", mTwoPainz.toString())
+
         partnerListFragment = PartnerListFragment.newInstance()
         mapFragment = MapFragment.newInstance()
         //fragmentManager.inTransaction { replace(R.id.mapchat_nav_fragment, PartnerListFragment.newInstance()) }
-
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, partnerListFragment)
         transaction.commit()
 
         if (mTwoPainz) {
             /*
-            fragmentManager.inTransaction {
-                add(R.id.partnerMapView, MapFragment.newInstance())
-            }
+            fragmentManager.inTransaction { add(R.id.partnerMapView, MapFragment.newInstance())}
             */
-
             fragmentManager.executePendingTransactions()
             val transaction2 = fragmentManager.beginTransaction()
             transaction2.replace(R.id.partnerMapView, mapFragment)
                     .commit()
         }
-
-    }
-
-    private inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {
-        beginTransaction().func().commit()
     }
 
     override fun onResume() {
@@ -99,7 +86,7 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface
         //}
 
         val transaction = fragmentManager.beginTransaction()
-        transaction.replace(R.id.mapchat_nav_fragment, mapFragment)
+        transaction.replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
                 .addToBackStack(null)
                 .commit()
         fragmentManager.executePendingTransactions()
@@ -107,6 +94,10 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface
 
     override fun getUserArrayList(): ArrayList<Model.User> {
         return mArrayList
+    }
+
+    private inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {
+        beginTransaction().func().commit()
     }
 
     companion object {

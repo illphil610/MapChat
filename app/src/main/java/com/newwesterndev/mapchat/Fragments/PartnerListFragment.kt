@@ -18,6 +18,8 @@ import com.newwesterndev.mapchat.Model.RxBus
 
 import com.newwesterndev.mapchat.R
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
 class PartnerListFragment : Fragment(), DataAdapter.Listener {
@@ -25,10 +27,8 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     private var mPartnerList = ArrayList<Model.User>()
     private lateinit  var mDataAdapter: DataAdapter
     private lateinit var mPartnerListInterface: PartnerListInterface
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private var mCompositeDisposable = CompositeDisposable()
+    private lateinit var mDisposable: Disposable
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -40,26 +40,12 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
         mDataAdapter = DataAdapter(mPartnerList, this)
         partnerList.adapter = mDataAdapter
-
-        RxBus.listen(Model.UserList::class.java)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe({
-                    mPartnerList.clear()
-                    mPartnerList.addAll(it.users)
-                    mDataAdapter.notifyDataSetChanged()
-        })
         return view
     }
 
     override fun onItemClick(user: Model.User) {
         Toast.makeText(activity, "${user.username}, ${user.latitude}, " +
                 "${user.longitude}", Toast.LENGTH_SHORT).show()
-
-        //fragmentManager.inTransaction {
-            //replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
-        //}
-        //fragmentManager.executePendingTransactions()
         mPartnerListInterface.userItemSelected()
     }
 
@@ -68,17 +54,35 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
         beginTransaction().func().addToBackStack(null).commit()
     }
 
-    companion object {
-        fun newInstance(): PartnerListFragment {
-            //val args = Bundle()
-            //fragment.arguments = args
-            return PartnerListFragment()
-        }
-    }
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         mPartnerListInterface = context as PartnerListInterface
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        mDisposable = RxBus.listen(Model.UserList::class.java)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({
+                    mPartnerList.clear()
+                    mPartnerList.addAll(it.users)
+                    Log.e("Partners", "partners updated")
+                    mDataAdapter.notifyDataSetChanged()
+                })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mCompositeDisposable.add(mDisposable)
+        mCompositeDisposable.clear()
+    }
+
+    companion object {
+        fun newInstance(): PartnerListFragment {
+            return PartnerListFragment()
+        }
     }
 
     interface PartnerListInterface {
