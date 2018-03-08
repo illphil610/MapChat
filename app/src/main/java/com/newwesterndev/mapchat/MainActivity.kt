@@ -1,10 +1,15 @@
 package com.newwesterndev.mapchat
 
+import android.Manifest
 import android.app.Activity
 import android.app.FragmentManager
 import android.app.FragmentTransaction
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.util.Log
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapView
 import com.newwesterndev.mapchat.Fragments.MapFragment
 import com.newwesterndev.mapchat.Fragments.PartnerListFragment
@@ -27,12 +32,18 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
     private lateinit var mRequestInterface: RequestInterface
     private lateinit var partnerListFragment: PartnerListFragment
     private lateinit var mapFragment: MapFragment
+    private lateinit var mFusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
 
+        ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION), 10)
+
+        val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         partnerListFragment = PartnerListFragment.newInstance()
         mapFragment = MapFragment.newInstance()
         //fragmentManager.inTransaction { replace(R.id.mapchat_nav_fragment, PartnerListFragment.newInstance()) }
@@ -41,13 +52,45 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
         transaction.commit()
 
         if (mTwoPainz) {
-            /*
-            fragmentManager.inTransaction { add(R.id.partnerMapView, MapFragment.newInstance())}
-            */
+            //fragmentManager.inTransaction { add(R.id.partnerMapView, MapFragment.newInstance())}
             fragmentManager.executePendingTransactions()
             val transaction2 = fragmentManager.beginTransaction()
             transaction2.replace(R.id.partnerMapView, mapFragment)
                     .commit()
+        }
+
+        if (ActivityCompat.checkSelfPermission
+                (this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission
+                    (this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        , 10) }
+        } else {
+            mFusedLocationClient.lastLocation.addOnSuccessListener {
+                if (it != null) {
+                    mUtility.showToast(this, it.toString())
+                } else {
+                    mUtility.showToast(this, "Nah Fam")
+                }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                mFusedLocationClient.lastLocation.addOnSuccessListener {
+                    if (it != null) {
+                        mUtility.showToast(this, it.toString())
+                    } else {
+                        mUtility.showToast(this, "Nah Fam")
+                    }
+                }
+            }
         }
     }
 
@@ -62,7 +105,7 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
         mUtility.clearDisposables(mCompositeDisposable, mDisposable)
     }
 
-    private fun pollServer(requestInterface: RequestInterface) : Disposable {
+    private fun pollServer(requestInterface: RequestInterface): Disposable {
         return Observable.interval(30, TimeUnit.SECONDS)
                 .startWith(0)
                 .flatMap { requestInterface.getUsers() }
@@ -82,9 +125,8 @@ class MainActivity : Activity(), PartnerListFragment.PartnerListInterface, MapFr
 
     override fun userItemSelected() {
         //fragmentManager.inTransaction {
-            //add(R.id.mapchat_nav_fragment, MapFragment.newInstance())
+        //add(R.id.mapchat_nav_fragment, MapFragment.newInstance())
         //}
-
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
                 .addToBackStack(null)
