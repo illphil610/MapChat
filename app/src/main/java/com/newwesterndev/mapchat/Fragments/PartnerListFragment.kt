@@ -24,6 +24,7 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
     private var mPartnerList = ArrayList<Model.User>()
     private lateinit  var mDataAdapter: DataAdapter
+    private lateinit var mPartnerListInterface: PartnerListInterface
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +56,11 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
         Toast.makeText(activity, "${user.username}, ${user.latitude}, " +
                 "${user.longitude}", Toast.LENGTH_SHORT).show()
 
-        fragmentManager.inTransaction {
-            replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
-        }
+        //fragmentManager.inTransaction {
+            //replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
+        //}
+        //fragmentManager.executePendingTransactions()
+        mPartnerListInterface.userItemSelected()
     }
 
     private inline fun FragmentManager.inTransaction(
@@ -71,5 +74,14 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
             //fragment.arguments = args
             return PartnerListFragment()
         }
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        mPartnerListInterface = context as PartnerListInterface
+    }
+
+    interface PartnerListInterface {
+        fun userItemSelected()
     }
 }

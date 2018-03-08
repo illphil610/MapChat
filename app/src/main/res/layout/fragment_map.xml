@@ -6,7 +6,7 @@
     tools:context="com.newwesterndev.mapchat.Fragments.MapFragment">
 
     <com.mapbox.mapboxsdk.maps.MapView
-        android:id="@+id/partnerMapView"
+        android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="40.73581"
