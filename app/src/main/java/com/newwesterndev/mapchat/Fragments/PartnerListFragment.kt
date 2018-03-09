@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.app.Fragment
 import android.app.FragmentManager
 import android.app.FragmentTransaction
+import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -21,6 +22,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.fragment_partner_list.*
 
 class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
@@ -29,6 +31,7 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     private lateinit var mPartnerListInterface: PartnerListInterface
     private var mCompositeDisposable = CompositeDisposable()
     private lateinit var mDisposable: Disposable
+    //private lateinit var fab:
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -37,6 +40,11 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
         val layoutManager : RecyclerView.LayoutManager = LinearLayoutManager(activity)
         partnerList.layoutManager = layoutManager
         partnerList.setHasFixedSize(true)
+
+        val fab = view.findViewById<FloatingActionButton>(R.id.fab)
+        fab.setOnClickListener {
+            Log.e("FAB", "pressed")
+        }
 
         mDataAdapter = DataAdapter(mPartnerList, this)
         partnerList.adapter = mDataAdapter
