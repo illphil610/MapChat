@@ -2,6 +2,7 @@ package com.newwesterndev.mapchat
 
 import android.Manifest
 import android.app.Activity
+import android.app.DialogFragment
 import android.app.FragmentManager
 import android.app.FragmentTransaction
 import android.content.pm.PackageManager
@@ -15,6 +16,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapView
+import com.newwesterndev.mapchat.Fragments.AddNewUserFragment
 import com.newwesterndev.mapchat.Fragments.MapFragment
 import com.newwesterndev.mapchat.Fragments.PartnerListFragment
 import com.newwesterndev.mapchat.Model.Model
@@ -29,7 +31,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface {
+class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface
+                                        , AddNewUserFragment.AddNewUserDialogListener{
 
     private var mCompositeDisposable = CompositeDisposable()
     private val mUtility = Utility(this)
@@ -128,6 +131,13 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
 
     private fun handleError(error: Throwable) {
         Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
+    }
+
+    override fun onDialogPositiveClick(dialogFragment: DialogFragment, username: String) {
+        mUtility.showToast(this, "ADDING THOSE USERS")
+    }
+
+    override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
     }
 
     override fun userItemSelected() {

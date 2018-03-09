@@ -1,5 +1,6 @@
 package com.newwesterndev.mapchat.Fragments
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.app.Fragment
@@ -12,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import com.newwesterndev.mapchat.Adapter.DataAdapter
 import com.newwesterndev.mapchat.Model.Model
@@ -23,6 +25,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_partner_list.*
+import org.jetbrains.anko.alert
 
 class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
@@ -31,6 +34,7 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     private lateinit var mPartnerListInterface: PartnerListInterface
     private var mCompositeDisposable = CompositeDisposable()
     private lateinit var mDisposable: Disposable
+    private var newUserDialog = AddNewUserFragment()
     //private lateinit var fab:
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
@@ -43,7 +47,8 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
         val fab = view.findViewById<FloatingActionButton>(R.id.fab)
         fab.setOnClickListener {
-            Log.e("FAB", "pressed")
+            newUserDialog.show(fragmentManager, "AddNewUser")
+
         }
 
         mDataAdapter = DataAdapter(mPartnerList, this)
