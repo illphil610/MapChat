@@ -25,7 +25,7 @@ interface RequestInterface {
     fun addUser(
             @Field("user") username: String,
             @Field("latitude") latitude: String,
-            @Field("longitude") longitude: String) : Observable<Model.User>
+            @Field("longitude") longitude: String) : Callback<Model.User>
 
     companion object Factory
         fun create(): RequestInterface {
