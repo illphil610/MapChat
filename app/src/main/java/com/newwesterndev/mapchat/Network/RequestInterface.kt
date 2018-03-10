@@ -2,6 +2,7 @@ package com.newwesterndev.mapchat.Network
 
 import com.newwesterndev.mapchat.Model.Model
 import io.reactivex.Observable
+import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -24,8 +25,8 @@ interface RequestInterface {
     @FormUrlEncoded
     fun addUser(
             @Field("user") username: String,
-            @Field("latitude") latitude: String,
-            @Field("longitude") longitude: String) : Callback<Model.User>
+            @Field("latitude") latitude: Double,
+            @Field("longitude") longitude: Double) : Call<Void>
 
     companion object Factory
         fun create(): RequestInterface {

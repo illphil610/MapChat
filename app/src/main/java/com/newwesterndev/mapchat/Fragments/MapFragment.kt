@@ -78,6 +78,8 @@ class MapFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         mMapView?.onPause()
+        mCompositeDisposable.add(mDisposable)
+        mCompositeDisposable.clear()
     }
 
     override fun onLowMemory() {

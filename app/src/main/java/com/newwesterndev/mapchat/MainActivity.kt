@@ -1,11 +1,11 @@
 package com.newwesterndev.mapchat
 
 import android.Manifest
-import android.app.Activity
 import android.app.DialogFragment
 import android.app.FragmentManager
 import android.app.FragmentTransaction
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -29,33 +29,40 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.jetbrains.anko.coroutines.experimental.asReference
+import retrofit2.Call
+import retrofit2.Response
 import java.util.concurrent.TimeUnit
+import javax.security.auth.callback.Callback
 
 class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface
                                         , AddNewUserFragment.AddNewUserDialogListener{
 
     private var mCompositeDisposable = CompositeDisposable()
     private val mUtility = Utility(this)
-    private lateinit var mDisposable: Disposable
-    private lateinit var mDisposable2: Disposable
+    private var mDisposable: Disposable? = null
+    private var mRxLocationDisposable: Disposable? = null
     private lateinit var mRequestInterface: RequestInterface
     private lateinit var partnerListFragment: PartnerListFragment
     private lateinit var mapFragment: MapFragment
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private lateinit var mLocation: Location
+    private lateinit var mAddress: Address
     private lateinit var rxLocation: RxLocation
     private lateinit var locationRequest: LocationRequest
-    private lateinit var mUserName: Model.User
+    private var mUserName: Model.User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION), 10)
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         rxLocation = RxLocation(this)
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(30000)
+                //.setInterval(30000)
                 .setSmallestDisplacement(10.toFloat())
 
         val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
@@ -72,15 +79,14 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
             */
             fragmentManager.executePendingTransactions()
             val transaction2 = fragmentManager.beginTransaction()
-            transaction2.replace(R.id.partnerMapView, mapFragment)
-                    .commit()
+            transaction2.replace(R.id.partnerMapView, mapFragment).commit()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        mCompositeDisposable.add(mDisposable)
-        mCompositeDisposable.add(mDisposable2)
+        mDisposable?.let { mCompositeDisposable.add(it) }
+        mRxLocationDisposable?.let { mCompositeDisposable.add(it) }
         mCompositeDisposable.clear()
     }
 
@@ -93,7 +99,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                 (this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.checkSelfPermission
                     (this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mDisposable2 = rxLocation.location()
+                mRxLocationDisposable = rxLocation.location()
                         .updates(locationRequest)
                         .flatMap { rxLocation.geocoding().fromLocation(it).toObservable() }
                         .observeOn(AndroidSchedulers.mainThread())
@@ -101,7 +107,10 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                         .subscribe({
                             Toast.makeText(this, it.latitude.toString() + " " +
                                     it.longitude.toString(), Toast.LENGTH_LONG).show()
+                            mAddress = it
                             Log.e("Location", "location updated")
+
+                            // post to server with updated location info
                         })
             }
         }
@@ -110,8 +119,8 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     override fun onStop() {
         super.onStop()
         //mUtility.clearDisposables(mCompositeDisposable, mDisposable)
-        mCompositeDisposable.add(mDisposable)
-        mCompositeDisposable.add(mDisposable2)
+        mDisposable?.let { mCompositeDisposable.add(it) }
+        mRxLocationDisposable?.let { mCompositeDisposable.add(it) }
         mCompositeDisposable.clear()
     }
 
@@ -134,7 +143,16 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     }
 
     override fun onDialogPositiveClick(dialogFragment: DialogFragment, username: String) {
-        mUtility.showToast(this, "ADDING THOSE USERS")
+        //mUtility.showToast(this, username)
+        mUserName = Model.User(username, mAddress.latitude, mAddress.longitude)
+        val userName = mUserName
+        mUtility.showToast(this, mUserName?.username + mUserName?.latitude.toString()
+        + mUserName?.longitude.toString())
+
+        //POST user to karls server
+        if (userName != null) {
+            postUserToServer(userName)
+        }
     }
 
     override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
@@ -150,6 +168,21 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                 .addToBackStack(null)
                 .commit()
         fragmentManager.executePendingTransactions()
+    }
+
+    fun postUserToServer(user: Model.User) {
+        mRequestInterface.addUser(user.username, user.latitude, user.longitude)
+                .enqueue(object : retrofit2.Callback<Void> {
+                    override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
+                        Log.e("POST", "YAY")
+                    }
+
+                    override fun onFailure(call: Call<Void>?, t: Throwable?) {
+                        Log.e("POST", "NO")
+                    }
+                })
+
+
     }
 
     override fun getUserArrayList(): ArrayList<Model.User> {

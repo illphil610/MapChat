@@ -59,7 +59,7 @@ class Utility(context: Context) {
     }
 
     fun createUser(username: String, latLng: LatLng) : Model.User {
-        return Model.User(username, latLng.latitude.toString(), latLng.longitude.toString())
+        return Model.User(username, latLng.latitude, latLng.longitude)
     }
 
     fun showToast(content: Context, message: String) {
