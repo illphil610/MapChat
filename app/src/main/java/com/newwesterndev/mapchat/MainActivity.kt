@@ -6,7 +6,6 @@ import android.app.FragmentManager
 import android.app.FragmentTransaction
 import android.content.pm.PackageManager
 import android.location.Address
-import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
@@ -29,11 +28,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import org.jetbrains.anko.coroutines.experimental.asReference
 import retrofit2.Call
 import retrofit2.Response
 import java.util.concurrent.TimeUnit
-import javax.security.auth.callback.Callback
 
 class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface
                                         , AddNewUserFragment.AddNewUserDialogListener{
@@ -108,9 +105,10 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                             Toast.makeText(this, it.latitude.toString() + " " +
                                     it.longitude.toString(), Toast.LENGTH_LONG).show()
                             mAddress = it
-                            Log.e("Location", "location updated")
-
                             // post to server with updated location info
+                            //if (mUserName != null) {
+                                //postUserToServer(mUserName!!)
+                            //}
                         })
             }
         }
@@ -135,6 +133,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
 
     private fun handleResponse(userList: List<Model.User>) {
         mArrayList = ArrayList(userList)
+        //mUserName?.let { mUtility.getPartnersListWithDistanceData(mArrayList, it) }
         RxBus.publish(Model.UserList(mArrayList))
     }
 
@@ -176,17 +175,22 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                     override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
                         Log.e("POST", "YAY")
                     }
-
                     override fun onFailure(call: Call<Void>?, t: Throwable?) {
                         Log.e("POST", "NO")
                     }
                 })
-
-
     }
 
     override fun getUserArrayList(): ArrayList<Model.User> {
         return mArrayList
+    }
+
+    override fun getCurrentUser() : Model.User {
+        //val currentUser = mUserName?.username?.let { Model.User(it, mAddress.latitude, mAddress.longitude) }
+        if (mUserName != null) {
+            return Model.User("Phil", mAddress.latitude, mAddress.longitude)
+        }
+        return Model.User("Phil", mAddress.latitude, mAddress.longitude)
     }
 
     private inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {

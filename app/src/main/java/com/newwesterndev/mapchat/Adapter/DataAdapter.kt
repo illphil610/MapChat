@@ -1,5 +1,6 @@
 package com.newwesterndev.mapchat.Adapter
 
+import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +8,7 @@ import android.view.ViewGroup
 import com.newwesterndev.mapchat.Model.Model
 import com.newwesterndev.mapchat.R
 import kotlinx.android.synthetic.main.recycler_view_row.view.*
+import org.jetbrains.anko.textColor
 
 class DataAdapter(private val userList: ArrayList<Model.User>, private val listener: Listener) : RecyclerView.Adapter<DataAdapter.ViewHolder>() {
 
@@ -28,6 +30,8 @@ class DataAdapter(private val userList: ArrayList<Model.User>, private val liste
     class ViewHolder(view : View) : RecyclerView.ViewHolder(view) {
         fun bind(user: Model.User, listener: Listener) {
             itemView.user_name.text = user.username
+            itemView.user_name.textSize = 30F
+            itemView.user_name.textColor = Color.parseColor("black")
             itemView.setOnClickListener { listener.onItemClick(user) }
         }
     }

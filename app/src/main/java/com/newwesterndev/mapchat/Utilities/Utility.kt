@@ -1,8 +1,8 @@
 package com.newwesterndev.mapchat.Utilities
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
-import android.view.Display
 import android.widget.Toast
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.newwesterndev.mapchat.MainActivity
@@ -68,5 +68,22 @@ class Utility(context: Context) {
 
     fun getArrayList(): ArrayList<Model.User> {
         return mUserArrayList
+    }
+
+    fun getPartnersListWithDistanceData(arrayList: ArrayList<Model.User>, currentUsers: Model.User): ArrayList<Model.Partner> {
+        var partnersList: ArrayList<Model.Partner> = ArrayList()
+        val currentLocation = Location("Current Users Location")
+        currentLocation.latitude = currentUsers.latitude
+        currentLocation.longitude = currentUsers.longitude
+
+        val tempLocation = Location("Temp")
+
+        for (user in arrayList) {
+            tempLocation.latitude = user.latitude
+            tempLocation.longitude = user.longitude
+            val distance = currentLocation.distanceTo(tempLocation)
+            partnersList.add(Model.Partner(user.username, user.latitude, user.longitude, distance))
+        }
+        return partnersList
     }
 }

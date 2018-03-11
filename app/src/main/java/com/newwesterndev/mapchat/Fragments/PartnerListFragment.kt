@@ -20,21 +20,17 @@ import com.newwesterndev.mapchat.Model.Model
 import com.newwesterndev.mapchat.Model.RxBus
 
 import com.newwesterndev.mapchat.R
+import com.newwesterndev.mapchat.Utilities.Utility
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_partner_list.*
 import org.jetbrains.anko.alert
+import java.util.*
+import kotlin.collections.ArrayList
 
-class PartnerListFragment : Fragment(), DataAdapter.Listener, AddNewUserFragment.AddNewUserDialogListener {
-    override fun onDialogPositiveClick(dialogFragment: DialogFragment, username: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+class PartnerListFragment : Fragment(), DataAdapter.Listener {
 
     private var mPartnerList = ArrayList<Model.User>()
     private lateinit  var mDataAdapter: DataAdapter
@@ -42,9 +38,13 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener, AddNewUserFragment
     private var mCompositeDisposable = CompositeDisposable()
     private lateinit var mDisposable: Disposable
     private var newUserDialog = AddNewUserFragment()
+    private lateinit var mUtility: Utility
+    private var mDistanceFormattedList = ArrayList<Model.Partner>()
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.fragment_partner_list, container, false)
+
+        mUtility = Utility(activity.applicationContext)
         val partnerList = view?.findViewById(R.id.partnerList) as RecyclerView
         val layoutManager : RecyclerView.LayoutManager = LinearLayoutManager(activity)
         partnerList.layoutManager = layoutManager
@@ -89,9 +89,15 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener, AddNewUserFragment
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({
+                    mDistanceFormattedList = mUtility.getPartnersListWithDistanceData(it.users, mPartnerListInterface.getCurrentUser())
+                    mDistanceFormattedList.sort()
                     mPartnerList.clear()
-                    mPartnerList.addAll(it.users)
-                    Log.e("Partners", "partners updated")
+                    for (i in mDistanceFormattedList.indices) {
+                        mPartnerList.add(Model.User(mDistanceFormattedList[i].username, mDistanceFormattedList[i].latitude,
+                                mDistanceFormattedList[i].longitude))
+                    }
+                    Log.e("old list", it.toString())
+                    Log.e("new list", mDistanceFormattedList.toString())
                     mDataAdapter.notifyDataSetChanged()
                 })
     }
@@ -120,5 +126,6 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener, AddNewUserFragment
 
     interface PartnerListInterface {
         fun userItemSelected()
+        fun getCurrentUser() : Model.User
     }
 }
