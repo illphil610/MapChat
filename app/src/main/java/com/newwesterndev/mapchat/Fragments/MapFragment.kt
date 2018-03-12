@@ -33,8 +33,7 @@ class MapFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.fragment_map, container, false)
         mMapView = view?.findViewById<MapView>(R.id.mapView)
         mMapView?.onCreate(savedInstanceState)
@@ -106,7 +105,7 @@ class MapFragment : Fragment() {
         mMapView?.getMapAsync({
             for (user in userList) {
                 val marker = MarkerOptions()
-                it.addMarker(marker.position(LatLng(user.latitude.toDouble(), user.longitude.toDouble())))
+                it.addMarker(marker.position(LatLng(user.latitude, user.longitude)))
             }
         })
     }

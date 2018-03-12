@@ -4,13 +4,13 @@ import android.Manifest
 import android.app.DialogFragment
 import android.app.FragmentManager
 import android.app.FragmentTransaction
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.widget.Toast
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     private lateinit var partnerListFragment: PartnerListFragment
     private lateinit var mapFragment: MapFragment
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
-    private lateinit var mAddress: Address
+    private var mAddress: Address? = null
     private lateinit var rxLocation: RxLocation
     private lateinit var locationRequest: LocationRequest
     private var mUserName: Model.User? = null
@@ -59,21 +59,17 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         rxLocation = RxLocation(this)
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                //.setInterval(30000)
                 .setSmallestDisplacement(10.toFloat())
 
         val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
         partnerListFragment = PartnerListFragment.newInstance()
         mapFragment = MapFragment.newInstance()
-        //fragmentManager.inTransaction { replace(R.id.mapchat_nav_fragment, PartnerListFragment.newInstance()) }
+
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, partnerListFragment)
         transaction.commit()
 
         if (mTwoPainz) {
-            /*
-            fragmentManager.inTransaction { add(R.id.partnerMapView, MapFragment.newInstance())}
-            */
             fragmentManager.executePendingTransactions()
             val transaction2 = fragmentManager.beginTransaction()
             transaction2.replace(R.id.partnerMapView, mapFragment).commit()
@@ -102,13 +98,14 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
                         .subscribe({
-                            Toast.makeText(this, it.latitude.toString() + " " +
-                                    it.longitude.toString(), Toast.LENGTH_LONG).show()
                             mAddress = it
-                            // post to server with updated location info
-                            //if (mUserName != null) {
-                                //postUserToServer(mUserName!!)
-                            //}
+                            mUtility.showToast(this, it.latitude.toString() + " " + it.longitude.toString())
+
+                            // Get current user if they made a username
+                            val currentUser = getCurrentUser()
+                            // this is my fail safe if the didnt make a user lol
+                            if (currentUser != null && currentUser.username != getString(R.string.defaultUser)) {
+                                postUserToServer(currentUser) }
                         })
             }
         }
@@ -116,7 +113,6 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
 
     override fun onStop() {
         super.onStop()
-        //mUtility.clearDisposables(mCompositeDisposable, mDisposable)
         mDisposable?.let { mCompositeDisposable.add(it) }
         mRxLocationDisposable?.let { mCompositeDisposable.add(it) }
         mCompositeDisposable.clear()
@@ -133,7 +129,6 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
 
     private fun handleResponse(userList: List<Model.User>) {
         mArrayList = ArrayList(userList)
-        //mUserName?.let { mUtility.getPartnersListWithDistanceData(mArrayList, it) }
         RxBus.publish(Model.UserList(mArrayList))
     }
 
@@ -142,15 +137,21 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     }
 
     override fun onDialogPositiveClick(dialogFragment: DialogFragment, username: String) {
-        //mUtility.showToast(this, username)
-        mUserName = Model.User(username, mAddress.latitude, mAddress.longitude)
-        val userName = mUserName
-        mUtility.showToast(this, mUserName?.username + mUserName?.latitude.toString()
-        + mUserName?.longitude.toString())
 
-        //POST user to karls server
-        if (userName != null) {
-            postUserToServer(userName)
+        if (mAddress != null) {
+            mUserName = Model.User(username, mAddress?.latitude!!, mAddress?.longitude!!)
+            val letUserName = mUserName
+            mUtility.showToast(this, mUserName?.username + mUserName?.latitude.toString()
+                    + mUserName?.longitude.toString())
+
+            val prefs = this.getSharedPreferences("com.newwesterndev.MapChat.prefs", Context.MODE_PRIVATE)
+            val editor = prefs.edit()
+            editor.putString("username", username)
+            editor.apply()
+
+            if (letUserName != null) {
+                postUserToServer(letUserName)
+            }
         }
     }
 
@@ -158,10 +159,6 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     }
 
     override fun userItemSelected() {
-        //fragmentManager.inTransaction {
-            //add(R.id.mapchat_nav_fragment, MapFragment.newInstance())
-        //}
-
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
                 .addToBackStack(null)
@@ -169,11 +166,11 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         fragmentManager.executePendingTransactions()
     }
 
-    fun postUserToServer(user: Model.User) {
+    private fun postUserToServer(user: Model.User) {
         mRequestInterface.addUser(user.username, user.latitude, user.longitude)
                 .enqueue(object : retrofit2.Callback<Void> {
                     override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
-                        Log.e("POST", "YAY")
+                        Log.e("POST", "YAY " + user.username)
                     }
                     override fun onFailure(call: Call<Void>?, t: Throwable?) {
                         Log.e("POST", "NO")
@@ -185,12 +182,15 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         return mArrayList
     }
 
-    override fun getCurrentUser() : Model.User {
-        //val currentUser = mUserName?.username?.let { Model.User(it, mAddress.latitude, mAddress.longitude) }
-        if (mUserName != null) {
-            return Model.User("Phil", mAddress.latitude, mAddress.longitude)
+    override fun getCurrentUser() : Model.User? {
+        val preferences = getSharedPreferences("com.newwesterndev.MapChat.prefs", Context.MODE_PRIVATE)
+        val user = preferences.getString("username", getString(R.string.defaultUser))
+        mUtility.showToast(this, user)
+
+        if (!user.isEmpty() && mAddress != null) {
+            return Model.User(user, mAddress!!.latitude, mAddress!!.longitude)
         }
-        return Model.User("Phil", mAddress.latitude, mAddress.longitude)
+        return null
     }
 
     private inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {

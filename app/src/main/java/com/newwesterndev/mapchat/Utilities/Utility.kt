@@ -25,41 +25,12 @@ class Utility(context: Context) {
     val mContext = context
     private var mUserArrayList: ArrayList<Model.User> = ArrayList()
 
-    fun clearDisposables(compositeDisposable: CompositeDisposable, disposable: Disposable) {
-        compositeDisposable.add(disposable)
-        compositeDisposable.clear()
-    }
-
     fun loadJSON(): RequestInterface {
         return Retrofit.Builder()
                 .baseUrl(mContext.getString(R.string.kamorris))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(RequestInterface::class.java)
-    }
-
-    fun pollServer(requestInterface: RequestInterface) : Disposable {
-        return Observable.interval(30, TimeUnit.SECONDS)
-                .startWith(0)
-                .flatMap { requestInterface.getUsers() }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::handleResponse, this::handleError)
-    }
-
-    private fun handleResponse(userList: List<Model.User>) {
-        //Toast.makeText(mContext, "Updating list", Toast.LENGTH_SHORT).show()
-        mUserArrayList = ArrayList(userList)
-        RxBus.publish(Model.UserList(mUserArrayList))
-    }
-
-    private fun handleError(error: Throwable) {
-        Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
-        //Toast.makeText(mContext, "Error ${error.localizedMessage}", Toast.LENGTH_SHORT).show()
-    }
-
-    fun createUser(username: String, latLng: LatLng) : Model.User {
-        return Model.User(username, latLng.latitude, latLng.longitude)
     }
 
     fun showToast(content: Context, message: String) {
