@@ -23,6 +23,12 @@ interface RequestInterface {
             @Field("latitude") latitude: Double,
             @Field("longitude") longitude: Double) : Call<Void>
 
+    @POST("lab/fcm_register.php")
+    @FormUrlEncoded
+    fun addUserToken(
+            @Field("user") username: String,
+            @Field("token") fcm_token: String) : Call<Void>
+
     companion object Factory
         fun create(): RequestInterface {
             val retrofit = Retrofit.Builder()
