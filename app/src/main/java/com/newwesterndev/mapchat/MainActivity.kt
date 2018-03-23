@@ -5,6 +5,7 @@ import android.app.DialogFragment
 import android.app.FragmentManager
 import android.app.FragmentTransaction
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.os.Bundle
@@ -159,11 +160,15 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     }
 
     override fun userItemSelected() {
+        /*
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
                 .addToBackStack(null)
                 .commit()
         fragmentManager.executePendingTransactions()
+        */
+        val intent = Intent(this, ChatActivity::class.java)
+        startActivity(intent)
     }
 
     private fun postUserToServer(user: Model.User) {
