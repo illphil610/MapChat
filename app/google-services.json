@@ -10,12 +10,56 @@
       "client_info": {
         "mobilesdk_app_id": "1:960685354218:android:1310283408fb67a5",
         "android_client_info": {
-          "package_name": "edu.temple.mapchat"
+          "package_name": "com.newwesterndev.mapchat"
         }
       },
       "oauth_client": [
         {
           "client_id": "960685354218-5i6gq0m7rr5o0fqcm84srn1prstmrq2h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.newwesterndev.mapchat",
+            "certificate_hash": "15ece59023aa666ddf7ea2a749bbca137754e2a1"
+          }
+        },
+        {
+          "client_id": "960685354218-kishccrotc9g33ovka408gs7rd1ktpd3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWZw65KrwngwZQQotztcnV-rFagSq-WIc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "960685354218-kishccrotc9g33ovka408gs7rd1ktpd3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:960685354218:android:f1f037bede9124e7",
+        "android_client_info": {
+          "package_name": "edu.temple.mapchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "960685354218-7n1p91fqefb1jltg3lgvh9n6j32trjpo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "edu.temple.mapchat",
