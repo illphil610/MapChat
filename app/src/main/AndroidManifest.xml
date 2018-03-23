@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.newwesterndev.mapchat">
+    package="edu.temple.mapchat">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="edu.temple.mapchat.MainActivity"
             android:launchMode="standard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,13 +23,13 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".Utilities.MapChatMessageService">
+        <service android:name="edu.temple.mapchat.Utilities.MapChatMessageService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
-        <activity android:name=".ChatActivity"></activity>
+        <activity android:name="edu.temple.mapchat.ChatActivity"></activity>
     </application>
 
 </manifest>

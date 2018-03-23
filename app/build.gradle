@@ -13,7 +13,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        applicationId "com.newwesterndev.mapchat"
+        applicationId "edu.temple.mapchat"
         minSdkVersion 24
         targetSdkVersion 26
         versionCode 1

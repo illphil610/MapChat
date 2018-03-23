@@ -4,6 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.newwesterndev.mapchat.ChatActivity">
+    tools:context="com.newwesterndev.mapchat.edu.newwesterndev.mapchat.ChatActivity">
 
 </android.support.constraint.ConstraintLayout>
