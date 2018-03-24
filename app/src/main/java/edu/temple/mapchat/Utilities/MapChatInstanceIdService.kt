@@ -10,15 +10,15 @@ import retrofit2.Response
 /**
  * Created by philip on 3/21/18.
  */
-class MapChatMessageService: FirebaseInstanceIdService() {
+class MapChatInstanceIdService: FirebaseInstanceIdService() {
 
     private var hasTokenBeenSentToKarlsServer: Boolean = false
-    private val mUtility = Utility(this)
 
     override fun onTokenRefresh() {
         super.onTokenRefresh()
         val refreshedToken = FirebaseInstanceId.getInstance().token
         Log.e(TAG, "Refreshed token: $refreshedToken")
+        val mUtility = Utility(this)
 
         // send id to karls server
         // this if statement is dumb

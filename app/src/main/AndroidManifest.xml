@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="edu.temple.mapchat.MainActivity"
+            android:name=".MainActivity"
             android:launchMode="standard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,13 +23,19 @@
             </intent-filter>
         </activity>
 
-        <service android:name="edu.temple.mapchat.Utilities.MapChatMessageService">
+        <service android:name=".Utilities.MapChatInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+        <service android:name=".Utilities.MapChatMessageReceiverService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
-        <activity android:name="edu.temple.mapchat.ChatActivity"></activity>
+        <activity android:name=".ChatActivity" />
+        <activity android:name=".KeyExchangeActivity"></activity>
     </application>
 
 </manifest>

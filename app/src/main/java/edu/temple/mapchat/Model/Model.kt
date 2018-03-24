@@ -1,5 +1,7 @@
 package edu.temple.mapchat.Model
 
+import java.security.KeyPair
+
 object Model {
     data class User(var username: String,
                     var latitude: Double,
@@ -17,4 +19,12 @@ object Model {
     }
 
     data class UserList(var users: ArrayList<User>)
+
+    data class ChatMessage(var sendToUser: String,
+                           var sentFromUser: String,
+                           var message: String)
+
+    data class ProviderKeys(val keys: KeyPair,
+                           val publicKeyAsString: String,
+                           val privateKeyAsString: String)
 }
