@@ -1,4 +1,4 @@
-package edu.temple.mapchat
+package edu.temple.mapchat.Activities
 
 import android.Manifest
 import android.app.DialogFragment
@@ -24,6 +24,8 @@ import edu.temple.mapchat.Model.RxBus
 import edu.temple.mapchat.Network.RequestInterface
 import edu.temple.mapchat.Utilities.Utility
 import com.patloew.rxlocation.RxLocation
+import edu.temple.mapchat.Fragments.AddNewPartnerFragment
+import edu.temple.mapchat.R
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -36,8 +38,11 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface
                                         , AddNewUserFragment.AddNewUserDialogListener{
 
+    // Looking into dependency injection for this but didnt want to waste time
+    // Dagger2 is the library i am thinking of using
     private var mCompositeDisposable = CompositeDisposable()
     private val mUtility = Utility(this)
+
     private var mDisposable: Disposable? = null
     private var mRxLocationDisposable: Disposable? = null
     private lateinit var mRequestInterface: RequestInterface
@@ -56,16 +61,20 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION), 10)
 
+        // i dont even use this...delete when you get a second to make sure it doesnt break stuff haha
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // This is how im getting the location nonsense and blah blah blahhhhhhhh
         rxLocation = RxLocation(this)
         locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setSmallestDisplacement(10.toFloat())
 
+        // Theres a better way to check if its landscape too...figure that out
         val mTwoPainz = findViewById<MapView>(R.id.partnerMapView) != null
+
         partnerListFragment = PartnerListFragment.newInstance()
         mapFragment = MapFragment.newInstance()
-
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, partnerListFragment)
         transaction.commit()
@@ -100,7 +109,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                         .subscribeOn(Schedulers.io())
                         .subscribe({
                             mAddress = it
-                            mUtility.showToast(this, it.latitude.toString() + " " + it.longitude.toString())
+                            //mUtility.showToast(this, it.latitude.toString() + " " + it.longitude.toString())
 
                             // Get current user if they made a username
                             val currentUser = getCurrentUser()
@@ -142,8 +151,8 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         if (mAddress != null) {
             mUserName = Model.User(username, mAddress?.latitude!!, mAddress?.longitude!!)
             val letUserName = mUserName
-            mUtility.showToast(this, mUserName?.username + mUserName?.latitude.toString()
-                    + mUserName?.longitude.toString())
+            //mUtility.showToast(this, mUserName?.username + mUserName?.latitude.toString()
+                    //+ mUserName?.longitude.toString())
 
             val prefs = this.getSharedPreferences("com.newwesterndev.MapChat.prefs", Context.MODE_PRIVATE)
             val editor = prefs.edit()
@@ -159,7 +168,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
     }
 
-    override fun userItemSelected() {
+    override fun userItemSelected(user: Model.User) {
         /*
         val transaction = fragmentManager.beginTransaction()
         transaction.replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
@@ -167,8 +176,20 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                 .commit()
         fragmentManager.executePendingTransactions()
         */
-        val intent = Intent(this, ChatActivity::class.java)
-        startActivity(intent)
+
+        // Check if username selected is saved within our shared prefs
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE) ?: return
+        val defaultValue = "Not Listed"
+        val selectedUserName = sharedPref.getString(user.username, defaultValue)
+
+        if (selectedUserName != defaultValue) {
+            val intent = Intent(this, ChatActivity::class.java)
+            startActivity(intent)
+        } else {
+            //mUtility.showToast(this, "You dont have the users public key")
+            val alert = AddNewPartnerFragment()
+            alert.show(fragmentManager, "AddNewPartner")
+        }
     }
 
     private fun postUserToServer(user: Model.User) {
@@ -190,7 +211,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     override fun getCurrentUser() : Model.User? {
         val preferences = getSharedPreferences("com.newwesterndev.MapChat.prefs", Context.MODE_PRIVATE)
         val user = preferences.getString("username", getString(R.string.defaultUser))
-        mUtility.showToast(this, user)
+        //mUtility.showToast(this, user)
 
         if (!user.isEmpty() && mAddress != null) {
             return Model.User(user, mAddress!!.latitude, mAddress!!.longitude)

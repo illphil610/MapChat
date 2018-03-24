@@ -65,7 +65,7 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     override fun onItemClick(user: Model.User) {
         Toast.makeText(activity, "${user.username}, ${user.latitude}, " +
                 "${user.longitude}", Toast.LENGTH_SHORT).show()
-        mPartnerListInterface.userItemSelected()
+        mPartnerListInterface.userItemSelected(user)
     }
 
     override fun onAttach(context: Context?) {
@@ -123,7 +123,7 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     }
 
     interface PartnerListInterface {
-        fun userItemSelected()
+        fun userItemSelected(user: Model.User)
         fun getCurrentUser() : Model.User?
     }
 }

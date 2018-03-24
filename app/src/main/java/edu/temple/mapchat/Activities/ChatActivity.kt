@@ -1,10 +1,11 @@
-package edu.temple.mapchat
+package edu.temple.mapchat.Activities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import edu.temple.mapchat.Model.Model
 import edu.temple.mapchat.Model.RxBus
+import edu.temple.mapchat.R
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable

@@ -1,7 +1,8 @@
-package edu.temple.mapchat
+package edu.temple.mapchat.Activities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import edu.temple.mapchat.R
 
 class KeyExchangeActivity : AppCompatActivity() {
 
