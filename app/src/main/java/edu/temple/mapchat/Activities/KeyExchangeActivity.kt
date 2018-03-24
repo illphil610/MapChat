@@ -3,7 +3,6 @@ package edu.temple.mapchat.Activities
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import edu.temple.mapchat.R
 import kotlinx.android.synthetic.main.activity_key_exchange.*
 
@@ -18,6 +17,6 @@ class KeyExchangeActivity : AppCompatActivity() {
         Log.e("USER NAME FROM LIST", partnerName)
         partners_user_name.text = partnerName
 
-        
+
     }
 }
