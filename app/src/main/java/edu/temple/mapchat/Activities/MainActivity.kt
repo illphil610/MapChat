@@ -36,13 +36,12 @@ import retrofit2.Response
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface
-                                        , AddNewUserFragment.AddNewUserDialogListener{
+                                        , AddNewUserFragment.AddNewUserDialogListener, AddNewPartnerFragment.AddNewPartnerInterface{
 
-    // Looking into dependency injection for this but didnt want to waste time
+    // Looking into dependency injection for this but didnt want to waste time until lab is complete
     // Dagger2 is the library i am thinking of using
     private var mCompositeDisposable = CompositeDisposable()
     private val mUtility = Utility(this)
-
     private var mDisposable: Disposable? = null
     private var mRxLocationDisposable: Disposable? = null
     private lateinit var mRequestInterface: RequestInterface
@@ -53,6 +52,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     private lateinit var rxLocation: RxLocation
     private lateinit var locationRequest: LocationRequest
     private var mUserName: Model.User? = null
+    private var mPartnerName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION,
                 android.Manifest.permission.ACCESS_COARSE_LOCATION), 10)
 
-        // i dont even use this...delete when you get a second to make sure it doesnt break stuff haha
+        // i dont even use this...delete when you make sure it doesnt break stuff haha
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // This is how im getting the location nonsense and blah blah blahhhhhhhh
@@ -115,7 +115,8 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                             val currentUser = getCurrentUser()
                             // this is my fail safe if the didnt make a user lol
                             if (currentUser != null && currentUser.username != getString(R.string.defaultUser)) {
-                                postUserToServer(currentUser) }
+                                postUserToServer(currentUser)
+                            }
                         })
             }
         }
@@ -146,47 +147,19 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         Log.d(MainActivity::class.java.simpleName, error.localizedMessage)
     }
 
-    override fun onDialogPositiveClick(dialogFragment: DialogFragment, username: String) {
-
-        if (mAddress != null) {
-            mUserName = Model.User(username, mAddress?.latitude!!, mAddress?.longitude!!)
-            val letUserName = mUserName
-            //mUtility.showToast(this, mUserName?.username + mUserName?.latitude.toString()
-                    //+ mUserName?.longitude.toString())
-
-            val prefs = this.getSharedPreferences("com.newwesterndev.MapChat.prefs", Context.MODE_PRIVATE)
-            val editor = prefs.edit()
-            editor.putString("username", username)
-            editor.apply()
-
-            if (letUserName != null) {
-                postUserToServer(letUserName)
-            }
-        }
-    }
-
-    override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
-    }
-
     override fun userItemSelected(user: Model.User) {
-        /*
-        val transaction = fragmentManager.beginTransaction()
-        transaction.replace(R.id.mapchat_nav_fragment, MapFragment.newInstance())
-                .addToBackStack(null)
-                .commit()
-        fragmentManager.executePendingTransactions()
-        */
-
         // Check if username selected is saved within our shared prefs
-        val sharedPref = this.getPreferences(Context.MODE_PRIVATE) ?: return
+        val sharedPref = this.getSharedPreferences("edu.temple.mapchat.PARTNER_LIST" ,Context.MODE_PRIVATE) ?: return
         val defaultValue = "Not Listed"
-        val selectedUserName = sharedPref.getString(user.username, defaultValue)
+        val selectedUsersPublicKey = sharedPref.getString(user.username, defaultValue)
 
-        if (selectedUserName != defaultValue) {
+        if (selectedUsersPublicKey != defaultValue) {
             val intent = Intent(this, ChatActivity::class.java)
+            intent.putExtra("username", user.username)
+            intent.putExtra("public_key", selectedUsersPublicKey)
             startActivity(intent)
         } else {
-            //mUtility.showToast(this, "You dont have the users public key")
+            mPartnerName = user.username
             val alert = AddNewPartnerFragment()
             alert.show(fragmentManager, "AddNewPartner")
         }
@@ -209,9 +182,9 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     }
 
     override fun getCurrentUser() : Model.User? {
-        val preferences = getSharedPreferences("com.newwesterndev.MapChat.prefs", Context.MODE_PRIVATE)
+        val preferences = getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
         val user = preferences.getString("username", getString(R.string.defaultUser))
-        //mUtility.showToast(this, user)
+        mUtility.showToast(this, user)
 
         if (!user.isEmpty() && mAddress != null) {
             return Model.User(user, mAddress!!.latitude, mAddress!!.longitude)
@@ -221,6 +194,34 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
 
     private inline fun FragmentManager.inTransaction(func: FragmentTransaction.() -> FragmentTransaction) {
         beginTransaction().func().commit()
+    }
+
+    // **** Used for dialog fragment response communication *****
+    // For adding a new username
+    override fun onDialogPositiveClick(dialogFragment: DialogFragment, username: String) {
+        if (mAddress != null) {
+            mUserName = Model.User(username, mAddress?.latitude!!, mAddress?.longitude!!)
+            val letUserName = mUserName
+            val prefs = this.getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
+            val editor = prefs.edit()
+            editor.putString("username", username)
+            editor.apply()
+
+            if (letUserName != null) {
+                postUserToServer(letUserName)
+            }
+        }
+    }
+    override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
+    }
+
+    //For asking if the user wants to add a new partner (save public key0
+    override fun onPartnerDialogPositiveClick(dialogFragment: DialogFragment) {
+        val intent = Intent(this, KeyExchangeActivity::class.java)
+        intent.putExtra("partnerName", mPartnerName)
+        startActivity(intent)
+    }
+    override fun onPartnerDialogNegativeClick(dialogFragment: DialogFragment) {
     }
 
     companion object {
