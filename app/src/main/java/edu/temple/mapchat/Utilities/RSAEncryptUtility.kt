@@ -3,6 +3,7 @@ package com.newwesterndev.encrypt_keeper.Utilities
 import android.content.Context
 import android.database.Cursor
 import android.nfc.NdefRecord
+import android.nfc.tech.Ndef
 
 import android.widget.Toast
 import edu.temple.mapchat.Model.Model
@@ -95,6 +96,12 @@ class RSAEncryptUtility {
         val keysRecord = NdefRecord.createMime("text/plain", pemFileAsString.toByteArray())
         val messageRecord = NdefRecord.createMime("text/plain", messageToSend)
         return arrayOf(keysRecord, messageRecord)
+    }
+
+    fun createTransferNdefRecord(username: String, pemFileAsString: String) : Array<NdefRecord> {
+        val usernameRecord = NdefRecord.createMime("text/plain", username.toByteArray())
+        val keysRecord = NdefRecord.createMime("text/plain", pemFileAsString.toByteArray())
+        return arrayOf(usernameRecord, keysRecord)
     }
 
     fun formatPemPublicKeyString(pemFileAsString: String) : String {

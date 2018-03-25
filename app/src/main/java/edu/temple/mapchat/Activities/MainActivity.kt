@@ -16,6 +16,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.mapbox.mapboxsdk.maps.MapView
+import com.newwesterndev.encrypt_keeper.Utilities.RSAEncryptUtility
 import edu.temple.mapchat.Fragments.AddNewUserFragment
 import edu.temple.mapchat.Fragments.MapFragment
 import edu.temple.mapchat.Fragments.PartnerListFragment
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
     private lateinit var locationRequest: LocationRequest
     private var mUserName: Model.User? = null
     private var mPartnerName: String? = null
+    private val encryptDelegate = RSAEncryptUtility()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,19 +109,22 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                         .flatMap { rxLocation.geocoding().fromLocation(it).toObservable() }
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
-                        .subscribe({
-                            mAddress = it
-                            //mUtility.showToast(this, it.latitude.toString() + " " + it.longitude.toString())
-
-                            // Get current user if they made a username
-                            val currentUser = getCurrentUser()
-                            // this is my fail safe if the didnt make a user lol
-                            if (currentUser != null && currentUser.username != getString(R.string.defaultUser)) {
-                                postUserToServer(currentUser)
-                            }
-                        })
+                        .subscribe(this::handleLocationResponse, this::handleLocationError)
             }
         }
+    }
+
+    private fun handleLocationResponse(address: Address) {
+        mAddress = address
+        val currentUser = getCurrentUser()
+        // this is my fail safe if they didnt make a user lol
+        if (currentUser != null && currentUser.username != getString(R.string.defaultUser)) {
+            postUserToServer(currentUser)
+        }
+    }
+
+    private fun handleLocationError(error: Throwable) {
+        Log.e("Location error", "Its all gooooooood")
     }
 
     override fun onStop() {
@@ -152,6 +157,7 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         val sharedPref = this.getSharedPreferences("edu.temple.mapchat.PARTNER_LIST" ,Context.MODE_PRIVATE) ?: return
         val defaultValue = "Not Listed"
         val selectedUsersPublicKey = sharedPref.getString(user.username, defaultValue)
+        Log.e("PublicKey", selectedUsersPublicKey)
 
         if (selectedUsersPublicKey != defaultValue) {
             val intent = Intent(this, ChatActivity::class.java)
@@ -202,9 +208,19 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         if (mAddress != null) {
             mUserName = Model.User(username, mAddress?.latitude!!, mAddress?.longitude!!)
             val letUserName = mUserName
+
+            // Generate public / private keys for the new user
+            val keyPair = encryptDelegate.generateKey()
+            val publicPEMFile = encryptDelegate.createPEMObject(keyPair.public)
+
+            // Save username, public/private keys, and also PEM public key file for NFC exchange
             val prefs = this.getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
             val editor = prefs.edit()
+            // Will replace these with a contract
             editor.putString("username", username)
+            editor.putString("username_public", keyPair.public.toString())
+            editor.putString("username_public_pem", publicPEMFile)
+            editor.putString("username_private", keyPair.private.toString())
             editor.apply()
 
             if (letUserName != null) {
