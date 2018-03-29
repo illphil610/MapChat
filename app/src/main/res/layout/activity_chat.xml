@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:chatview="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
+    style="@style/Widget.AppCompat.ButtonBar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context="edu.temple.mapchat.Activities.ChatActivity">
 
-    <EditText
-        android:id="@+id/input_message_edit_text"
+    <co.intentservice.chatui.ChatView
+        android:id="@+id/chat_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/send_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        chatview:backgroundColor="#bbdefb"
+        chatview:bubbleElevation="elevated"
+        chatview:sendBtnBackgroundTint="@color/blue"
+        chatview:bubbleBackgroundRcv="#bbdefb"
+        chatview:bubbleBackgroundSend="#bbdefb" />
 
 </LinearLayout>

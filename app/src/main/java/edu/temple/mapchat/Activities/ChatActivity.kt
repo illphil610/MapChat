@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import android.widget.TextView
+import co.intentservice.chatui.ChatView
+import co.intentservice.chatui.models.ChatMessage
 import com.newwesterndev.encrypt_keeper.Utilities.RSAEncryptUtility
 import edu.temple.mapchat.Model.Model
 import edu.temple.mapchat.Model.RxBus
@@ -22,6 +24,9 @@ import org.jetbrains.anko.sdk25.coroutines.onClick
 import retrofit2.Call
 import retrofit2.Response
 import java.security.KeyPair
+import edu.temple.mapchat.Model.Message
+import java.time.LocalTime
+
 
 class ChatActivity : AppCompatActivity() {
 
@@ -39,6 +44,8 @@ class ChatActivity : AppCompatActivity() {
 
         // Get partners stuff (name/public key)
         val partnerName = intent.getStringExtra("partner_name")
+        //Set title of activity to partner name
+        title = partnerName
         val partnerPublicKeyString = intent.getStringExtra("public_key")
         val partnerPublicKey = rsaUtility.getPublicKeyFromString(partnerPublicKeyString)
         Log.e("PARTNER PUBLIC", partnerPublicKey.toString())
@@ -65,10 +72,15 @@ class ChatActivity : AppCompatActivity() {
                     val sender = it.sentFromUser
                     val messageAsBytes = Base64.decode(it.message,  Base64.NO_WRAP)
                     val message = rsaUtility.decryptPublic(messageAsBytes, partnerPublicKey)
+
+                    // update UI
+                    chat_view.addMessage(ChatMessage(message, System.currentTimeMillis(), ChatMessage.Type.RECEIVED))
                     Log.e("DECRYPTED MSG", message)
                 }))
-        
+
+        /*
         send_button.setOnClickListener {
+
             Log.e("TestLog", input_message_edit_text.text.toString())
             val referenceInterface = mUtility.loadJSON()
             val byteArray = rsaUtility.encryptPrivate(input_message_edit_text.text.toString(), usersPrivateKey)
@@ -92,6 +104,35 @@ class ChatActivity : AppCompatActivity() {
                         }
                     })
         }
+        */
+
+        chat_view.setOnSentMessageListener(object : ChatView.OnSentMessageListener {
+            override fun sendMessage(chatMessage: ChatMessage): Boolean {
+                // perform actual message sending
+                val referenceInterface = mUtility.loadJSON()
+                val byteArray = rsaUtility.encryptPrivate(chatMessage.message.toString(), usersPrivateKey)
+
+                // Convert byte array to a base 64 string before sending to FCM
+                val bytesAsString = Base64.encodeToString(byteArray,  Base64.NO_WRAP)
+
+                // Make our POST request to Karl's server with the info needed
+                referenceInterface.sendMessage(currentUser, partnerName, bytesAsString)
+                        .enqueue(object : retrofit2.Callback<Void> {
+                            override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
+                                if (response?.isSuccessful!!) {
+                                    Log.e("MESSAGE",  response.body().toString())
+                                } else {
+                                    Log.e("ERROR", response.errorBody().toString())
+                                }
+                            }
+                            override fun onFailure(call: Call<Void>?, t: Throwable?) {
+                                Log.e("MESSAGE", "Better luck next time")
+                            }
+                        })
+                return true
+            }
+        })
+
     }
 
     override fun onDestroy() {
