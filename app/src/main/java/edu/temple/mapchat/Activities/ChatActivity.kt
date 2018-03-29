@@ -24,7 +24,6 @@ import org.jetbrains.anko.sdk25.coroutines.onClick
 import retrofit2.Call
 import retrofit2.Response
 import java.security.KeyPair
-import edu.temple.mapchat.Model.Message
 import java.time.LocalTime
 
 
