@@ -35,6 +35,7 @@ import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
 import retrofit2.Response
 import java.util.concurrent.TimeUnit
+import android.util.Base64
 
 class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterface, MapFragment.MapFragmentInterface
                                         , AddNewUserFragment.AddNewUserDialogListener, AddNewPartnerFragment.AddNewPartnerInterface{
@@ -159,10 +160,17 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
         val selectedUsersPublicKey = sharedPref.getString(user.username, defaultValue)
         Log.e("PublicKey", selectedUsersPublicKey)
 
+        // User stuff
+        val preferences = getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
+        val privateKey = preferences.getString("username_private_pem", "nah")
+        val publicKey = preferences.getString("formatted_public_pem", "nak2")
+
         if (selectedUsersPublicKey != defaultValue) {
             val intent = Intent(this, ChatActivity::class.java)
-            intent.putExtra("username", user.username)
+            intent.putExtra("partner_name", user.username)
             intent.putExtra("public_key", selectedUsersPublicKey)
+            intent.putExtra("myPrivateJawn", privateKey)
+            intent.putExtra("myPublicJawn", publicKey)
             startActivity(intent)
         } else {
             mPartnerName = user.username
@@ -179,6 +187,23 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
                     }
                     override fun onFailure(call: Call<Void>?, t: Throwable?) {
                         Log.e("POST", "NO")
+                    }
+                })
+    }
+
+    private fun postUserFCMToServer(user: Model.User, token: String) {
+        mRequestInterface.addUserToken(user.username, token)
+                .enqueue(object : retrofit2.Callback<Void> {
+                    override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
+                        Log.e("FCM POST", response.toString())
+                        if (response?.isSuccessful!!) {
+                            Log.e("FCM POST", response.toString())
+                        } else {
+                            Log.e("FCM POST", response.errorBody().toString())
+                        }
+                    }
+                    override fun onFailure(call: Call<Void>?, t: Throwable?) {
+                        Log.e("FCM POST", "WOMP WOMP WOMPPPPP")
                     }
                 })
     }
@@ -212,26 +237,42 @@ class MainActivity : AppCompatActivity(), PartnerListFragment.PartnerListInterfa
             // Generate public / private keys for the new user
             val keyPair = encryptDelegate.generateKey()
             val publicPEMFile = encryptDelegate.createPEMObject(keyPair.public)
+            val privatePEMFile = encryptDelegate.createPrivatePEM(keyPair.private)
+            Log.e("Private PEM", privatePEMFile)
+            val formattedPublicPEM = encryptDelegate.formatPemPublicKeyString(publicPEMFile)
+            val formattedPEM = encryptDelegate.formatPemPrivateKeyString(privatePEMFile)
 
             // Save username, public/private keys, and also PEM public key file for NFC exchange
             val prefs = this.getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
             val editor = prefs.edit()
             // Will replace these with a contract
+
+            val publicKeyToString = Base64.encodeToString(keyPair.public.encoded, Base64.DEFAULT)
+            val privateKeyToString = Base64.encodeToString(keyPair.private.encoded, Base64.DEFAULT)
+
             editor.putString("username", username)
-            editor.putString("username_public", keyPair.public.toString())
+            editor.putString("username_public", publicKeyToString)
             editor.putString("username_public_pem", publicPEMFile)
-            editor.putString("username_private", keyPair.private.toString())
+            editor.putString("username_private", privateKeyToString)
+            editor.putString("username_private_pem", formattedPEM)
+            editor.putString("formatted_public_pem", formattedPublicPEM)
             editor.apply()
 
-            if (letUserName != null) {
+            // get FCM from when the app was installed
+            val token = prefs.getString("FCM_ID", "NO")
+
+            if (letUserName != null && token != "NO") {
                 postUserToServer(letUserName)
+
+                // post FCM to karls server so we can chat with hats
+                postUserFCMToServer(letUserName, token)
             }
         }
     }
     override fun onDialogNegativeClick(dialogFragment: DialogFragment) {
     }
 
-    //For asking if the user wants to add a new partner (save public key0
+    //For asking if the user wants to add a new partner (save public key)
     override fun onPartnerDialogPositiveClick(dialogFragment: DialogFragment) {
         val intent = Intent(this, KeyExchangeActivity::class.java)
         intent.putExtra("partnerName", mPartnerName)

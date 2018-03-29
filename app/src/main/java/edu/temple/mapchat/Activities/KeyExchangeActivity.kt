@@ -29,7 +29,6 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
 
         // Grab selected partners name so they dont have to input it
         val partnerName = intent.getStringExtra("partnerName")
-        //Log.e("USER NAME FROM LIST", partnerName)
         partners_user_name.text = partnerName
 
         // NFC stuff and things
@@ -78,13 +77,8 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
         val pemPublicKeyFile = String(message.records[1].payload)
         val formattedPublicKey = mEncryptDelegate.formatPemPublicKeyString(pemPublicKeyFile)
         partner_public_key.text = formattedPublicKey
-        //Log.e("Received Public Key", formattedPublicKey)
 
-        // Save given info to the PARTNER_LIST jawn in shared prefs (username, public key)
-        // then go grab a beer and kick it with your home via MapShat
-
-        //if (String(mReceivedUserName) == intent.getStringExtra("partnerName")) {
-        val sharedPref = this.getSharedPreferences("edu.temple.mapchat.PARTNER_LIST" ,Context.MODE_PRIVATE) ?: return
+        val sharedPref = this.getSharedPreferences("edu.temple.mapchat.PARTNER_LIST", Context.MODE_PRIVATE) ?: return
         val editor = sharedPref.edit()
         editor.putString(String(mReceivedUserName), formattedPublicKey)
         editor.apply()

@@ -26,8 +26,15 @@ interface RequestInterface {
     @POST("lab/fcm_register.php")
     @FormUrlEncoded
     fun addUserToken(
-            @Field("user") username: String,
-            @Field("token") fcm_token: String) : Call<Void>
+            @Field("user") user: String,
+            @Field("token") token: String) : Call<Void>
+
+    @POST("lab/send_message.php")
+    @FormUrlEncoded
+    fun sendMessage(
+            @Field("user") user: String,
+            @Field("partneruser") partneruser: String,
+            @Field("message") message: String) : Call<Void>
 
     companion object Factory
         fun create(): RequestInterface {

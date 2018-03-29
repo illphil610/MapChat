@@ -92,6 +92,14 @@ class RSAEncryptUtility {
         return stringWriter.toString()
     }
 
+    fun createPrivatePEM(privateKey: PrivateKey) : String {
+        val stringWriter = StringWriter()
+        val pemWriter = JcaPEMWriter(stringWriter)
+        pemWriter.writeObject(privateKey)
+        pemWriter.close()
+        return stringWriter.toString()
+    }
+
     fun createNdefRecords(pemFileAsString: String, messageToSend: ByteArray): Array<NdefRecord> {
         val keysRecord = NdefRecord.createMime("text/plain", pemFileAsString.toByteArray())
         val messageRecord = NdefRecord.createMime("text/plain", messageToSend)
@@ -108,6 +116,12 @@ class RSAEncryptUtility {
         var publicKeyPEM = pemFileAsString.replace("-----BEGIN PUBLIC KEY-----\n", "")
         publicKeyPEM = publicKeyPEM.replace("-----END PUBLIC KEY-----\n", "")
         return publicKeyPEM
+    }
+
+    fun formatPemPrivateKeyString(pemFileAsString: String) : String {
+        var privateKeyPEM = pemFileAsString.replace("-----BEGIN RSA PRIVATE KEY-----\n", "")
+        privateKeyPEM = privateKeyPEM.replace("-----END RSA PRIVATE KEY-----\n", "")
+        return privateKeyPEM
     }
 
     companion object {
