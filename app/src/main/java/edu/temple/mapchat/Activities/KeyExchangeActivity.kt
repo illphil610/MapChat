@@ -43,18 +43,19 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
         proceedToChatButton.setOnClickListener {
 
             if (checkBox.isChecked) {
-
+                // Get my stuff
                 val preferences = getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
                 val privateKey = preferences.getString("username_private_pem", "nah")
                 val publicKey = preferences.getString("formatted_public_pem", "nak2")
 
-
+                // Send that stuff
                 val intent = Intent(this, ChatActivity::class.java)
                 intent.putExtra("partner_name", partnerName)
                 intent.putExtra("public_key", mFormattedPublicKey)
                 intent.putExtra("myPrivateJawn", privateKey)
                 intent.putExtra("myPublicJawn", publicKey)
                 startActivity(intent)
+                // This prevents the user from getting back to this screen when they push back
                 finish()
             }
         }
@@ -97,7 +98,6 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
         val pemPublicKeyFile = String(message.records[1].payload)
         val formattedPublicKey = mEncryptDelegate.formatPemPublicKeyString(pemPublicKeyFile)
         mFormattedPublicKey = formattedPublicKey
-        //partner_public_key.text = formattedPublicKey
         checkBox.isChecked = true
 
         val sharedPref = this.getSharedPreferences("edu.temple.mapchat.PARTNER_LIST", Context.MODE_PRIVATE) ?: return
