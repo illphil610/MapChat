@@ -52,7 +52,7 @@ class ChatActivity : AppCompatActivity() {
         // Gets Users stuff
         val testPrivateKey = intent.getStringExtra("myPrivateJawn")
         val testPublicKey = intent.getStringExtra("myPublicJawn")
-        Log.e("FUCK", testPublicKey)
+        //Log.e("FUCK", testPublicKey)
 
         // Get users public/private key to encrypt messages from the strings from above
         val usersPrivateKey = rsaUtility.getPrivateKeyFromString(testPrivateKey)
@@ -76,35 +76,7 @@ class ChatActivity : AppCompatActivity() {
                     chat_view.addMessage(ChatMessage(message, System.currentTimeMillis(), ChatMessage.Type.RECEIVED))
                     Log.e("DECRYPTED MSG", message)
                 }))
-
-        /*
-        send_button.setOnClickListener {
-
-            Log.e("TestLog", input_message_edit_text.text.toString())
-            val referenceInterface = mUtility.loadJSON()
-            val byteArray = rsaUtility.encryptPrivate(input_message_edit_text.text.toString(), usersPrivateKey)
-            Log.e("DECRYPT", rsaUtility.decryptPublic(byteArray, usersPublicKey))
-
-            // Convert byte array to a base 64 string before sending to FCM
-            val bytesAsString = Base64.encodeToString(byteArray,  Base64.NO_WRAP)
-
-            // Make our POST request to Karl's server with the info needed
-            referenceInterface.sendMessage(currentUser, partnerName, bytesAsString)
-                    .enqueue(object : retrofit2.Callback<Void> {
-                        override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
-                            if (response?.isSuccessful!!) {
-                                Log.e("MESSAGE",  response.body().toString())
-                            } else {
-                                Log.e("ERROR", response.errorBody().toString())
-                            }
-                        }
-                        override fun onFailure(call: Call<Void>?, t: Throwable?) {
-                            Log.e("MESSAGE", "Better luck next time")
-                        }
-                    })
-        }
-        */
-
+        
         chat_view.setOnSentMessageListener(object : ChatView.OnSentMessageListener {
             override fun sendMessage(chatMessage: ChatMessage): Boolean {
                 // perform actual message sending
@@ -131,7 +103,6 @@ class ChatActivity : AppCompatActivity() {
                 return true
             }
         })
-
     }
 
     override fun onDestroy() {

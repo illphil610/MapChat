@@ -18,6 +18,7 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
     private lateinit var mNfcAdapter: NfcAdapter
     private lateinit var mUtility: Utility
     private lateinit var mEncryptDelegate: RSAEncryptUtility
+    private lateinit var mFormattedPublicKey: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +30,7 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
 
         // Grab selected partners name so they dont have to input it
         val partnerName = intent.getStringExtra("partnerName")
-        partners_user_name.text = partnerName
+        title = partnerName
 
         // NFC stuff and things
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this)
@@ -38,6 +39,25 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
         }
         mNfcAdapter.setNdefPushMessageCallback(this, this)
         mNfcAdapter.setOnNdefPushCompleteCallback(this, this)
+
+        proceedToChatButton.setOnClickListener {
+
+            if (checkBox.isChecked) {
+
+                val preferences = getSharedPreferences("edu.temple.MapChat.USER_NAME", Context.MODE_PRIVATE)
+                val privateKey = preferences.getString("username_private_pem", "nah")
+                val publicKey = preferences.getString("formatted_public_pem", "nak2")
+
+
+                val intent = Intent(this, ChatActivity::class.java)
+                intent.putExtra("partner_name", partnerName)
+                intent.putExtra("public_key", mFormattedPublicKey)
+                intent.putExtra("myPrivateJawn", privateKey)
+                intent.putExtra("myPublicJawn", publicKey)
+                startActivity(intent)
+                finish()
+            }
+        }
     }
 
     override fun createNdefMessage(event: NfcEvent?): NdefMessage {
@@ -71,12 +91,14 @@ class KeyExchangeActivity : AppCompatActivity(), NfcAdapter.CreateNdefMessageCal
         val rawMessages = intent?.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
         val message = rawMessages?.get(0) as NdefMessage
         val mReceivedUserName = message.records[0].payload
-        partners_user_name.text = String(mReceivedUserName)
+        //partners_user_name.text = String(mReceivedUserName)
         Log.e("Received User Name:", String(mReceivedUserName))
 
         val pemPublicKeyFile = String(message.records[1].payload)
         val formattedPublicKey = mEncryptDelegate.formatPemPublicKeyString(pemPublicKeyFile)
-        partner_public_key.text = formattedPublicKey
+        mFormattedPublicKey = formattedPublicKey
+        //partner_public_key.text = formattedPublicKey
+        checkBox.isChecked = true
 
         val sharedPref = this.getSharedPreferences("edu.temple.mapchat.PARTNER_LIST", Context.MODE_PRIVATE) ?: return
         val editor = sharedPref.edit()
