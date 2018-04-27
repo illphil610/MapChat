@@ -1,12 +1,12 @@
-package com.newwesterndev.mapchat.Adapter
+package edu.temple.mapchat.Adapter
 
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.newwesterndev.mapchat.Model.Model
-import com.newwesterndev.mapchat.R
+import edu.temple.mapchat.Model.Model
+import edu.temple.mapchat.R
 import kotlinx.android.synthetic.main.recycler_view_row.view.*
 import org.jetbrains.anko.textColor
 

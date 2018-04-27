@@ -1,4 +1,7 @@
-package com.newwesterndev.mapchat.Model
+package edu.temple.mapchat.Model
+
+import java.security.KeyPair
+import java.util.*
 
 object Model {
     data class User(var username: String,
@@ -17,4 +20,12 @@ object Model {
     }
 
     data class UserList(var users: ArrayList<User>)
+
+    data class ChatMessage(var sendToUser: String,
+                           var sentFromUser: String,
+                           var message: String)
+
+    data class ProviderKeys(val keys: KeyPair,
+                           val publicKeyAsString: String,
+                           val privateKeyAsString: String)
 }

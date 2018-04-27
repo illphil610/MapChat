@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "960685354218",
-    "firebase_url": "https://mapchat-51dce.firebaseio.com",
-    "project_id": "mapchat-51dce",
-    "storage_bucket": "mapchat-51dce.appspot.com"
+    "project_number": "317716252612",
+    "firebase_url": "https://mapproject-1487260540141.firebaseio.com",
+    "project_id": "mapproject-1487260540141",
+    "storage_bucket": "mapproject-1487260540141.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:960685354218:android:1310283408fb67a5",
+        "mobilesdk_app_id": "1:317716252612:android:f1f037bede9124e7",
         "android_client_info": {
-          "package_name": "com.newwesterndev.mapchat"
+          "package_name": "edu.temple.mapchat"
         }
       },
       "oauth_client": [
         {
-          "client_id": "960685354218-5i6gq0m7rr5o0fqcm84srn1prstmrq2h.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.newwesterndev.mapchat",
-            "certificate_hash": "15ece59023aa666ddf7ea2a749bbca137754e2a1"
-          }
-        },
-        {
-          "client_id": "960685354218-kishccrotc9g33ovka408gs7rd1ktpd3.apps.googleusercontent.com",
+          "client_id": "317716252612-6vgghh7spfs6iim694p4bgjfubuhdrlg.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBWZw65KrwngwZQQotztcnV-rFagSq-WIc"
+          "current_key": "AIzaSyBfDXFHTsXTWHsGrso5tFmeu-LxP3XOTwU"
         }
       ],
       "services": {
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "960685354218-kishccrotc9g33ovka408gs7rd1ktpd3.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": [ ]
         },
         "ads_service": {
           "status": 2

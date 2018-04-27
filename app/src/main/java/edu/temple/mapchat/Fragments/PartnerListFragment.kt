@@ -1,4 +1,4 @@
-package com.newwesterndev.mapchat.Fragments
+package edu.temple.mapchat.Fragments
 
 import android.Manifest
 import android.app.*
@@ -14,12 +14,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.newwesterndev.mapchat.Adapter.DataAdapter
-import com.newwesterndev.mapchat.Model.Model
-import com.newwesterndev.mapchat.Model.RxBus
+import edu.temple.mapchat.Adapter.DataAdapter
+import edu.temple.mapchat.Model.Model
+import edu.temple.mapchat.Model.RxBus
 
-import com.newwesterndev.mapchat.R
-import com.newwesterndev.mapchat.Utilities.Utility
+import edu.temple.mapchat.R
+import edu.temple.mapchat.Utilities.Utility
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -63,9 +63,9 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     }
 
     override fun onItemClick(user: Model.User) {
-        Toast.makeText(activity, "${user.username}, ${user.latitude}, " +
-                "${user.longitude}", Toast.LENGTH_SHORT).show()
-        mPartnerListInterface.userItemSelected()
+        //Toast.makeText(activity, "${user.username}, ${user.latitude}, " +
+                //"${user.longitude}", Toast.LENGTH_SHORT).show()
+        mPartnerListInterface.userItemSelected(user)
     }
 
     override fun onAttach(context: Context?) {
@@ -123,7 +123,7 @@ class PartnerListFragment : Fragment(), DataAdapter.Listener {
     }
 
     interface PartnerListInterface {
-        fun userItemSelected()
+        fun userItemSelected(user: Model.User)
         fun getCurrentUser() : Model.User?
     }
 }

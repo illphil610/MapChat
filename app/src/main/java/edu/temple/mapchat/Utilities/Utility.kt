@@ -1,24 +1,14 @@
-package com.newwesterndev.mapchat.Utilities
+package edu.temple.mapchat.Utilities
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import android.widget.Toast
-import com.mapbox.mapboxsdk.geometry.LatLng
-import com.newwesterndev.mapchat.MainActivity
-import com.newwesterndev.mapchat.Model.Model
-import com.newwesterndev.mapchat.Model.RxBus
-import com.newwesterndev.mapchat.Network.RequestInterface
-import com.newwesterndev.mapchat.R
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import edu.temple.mapchat.Model.Model
+import edu.temple.mapchat.Network.RequestInterface
+import edu.temple.mapchat.R
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 class Utility(context: Context) {
 

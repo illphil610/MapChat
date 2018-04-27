@@ -1,4 +1,4 @@
-package com.newwesterndev.mapchat
+package edu.temple.mapchat
 
 import org.junit.Test
 

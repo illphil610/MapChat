@@ -1,4 +1,4 @@
-package com.newwesterndev.mapchat.Model
+package edu.temple.mapchat.Model
 
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject

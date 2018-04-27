@@ -1,4 +1,4 @@
-package com.newwesterndev.mapchat.Fragments
+package edu.temple.mapchat.Fragments
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,7 +6,7 @@ import android.app.DialogFragment
 import android.os.Bundle
 import android.content.Context
 
-import com.newwesterndev.mapchat.R
+import edu.temple.mapchat.R
 import kotlinx.android.synthetic.main.fragment_add_new_user.view.*
 
 class AddNewUserFragment : DialogFragment() {

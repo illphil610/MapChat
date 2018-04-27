@@ -1,4 +1,4 @@
-package com.newwesterndev.mapchat.Fragments
+package edu.temple.mapchat.Fragments
 
 import android.os.Bundle
 import android.app.Fragment
@@ -11,10 +11,10 @@ import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
-import com.newwesterndev.mapchat.Model.Model
-import com.newwesterndev.mapchat.Model.RxBus
+import edu.temple.mapchat.Model.Model
+import edu.temple.mapchat.Model.RxBus
 
-import com.newwesterndev.mapchat.R
+import edu.temple.mapchat.R
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -98,7 +98,7 @@ class MapFragment : Fragment() {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        mMapFragmentInterface = context as MapFragment.MapFragmentInterface
+        mMapFragmentInterface = context as MapFragmentInterface
     }
 
     private fun updateMap(userList: ArrayList<Model.User>) {
